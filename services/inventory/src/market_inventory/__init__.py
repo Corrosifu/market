@@ -1,0 +1,1 @@
+"""Service inventory de Market."""

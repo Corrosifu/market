@@ -1,0 +1,123 @@
+/* Jetons de design de Market : SEULE source des couleurs, espacements, rayons, typographies et durées.
+   Aucun composant n'écrit de valeur en dur : il utilise var(--...).
+   Base : skill « apple-design-system » (rukkiecodes, MIT), adapté au web et à l'accessibilité AA.
+   Écarts assumés : texte secondaire et couleurs de statut assombris (les valeurs d'origine ratent 4,5:1 sur fond clair),
+   police système (pas de police externe). Charte : docs/design/charte-graphique.md */
+:root {
+  /* Surfaces et texte */
+  --color-bg: #ffffff;
+  --color-surface: #f5f5f7;
+  --color-surface-raised: #fafafc;
+  --color-border: #e0e0e0;
+  --color-divider: #f0f0f0;
+  --color-text: #1d1d1f;
+  --color-text-secondary: #595959;
+  /* Accent unique (Action Blue) */
+  --color-accent: #0066cc;
+  --color-accent-focus: #0071e3;
+  --color-accent-contrast: #ffffff;
+  --color-accent-soft: #e8f1fb;
+  /* Statuts : réservés au sens (saturation de hub, retard, panne). Textes assombris pour l'AA. */
+  --color-ok: #1d7a3a;
+  --color-ok-soft: #e4f4ea;
+  --color-warn: #8f5200;
+  --color-warn-soft: #fff1d9;
+  --color-critical: #d70015;
+  --color-critical-soft: #fde8e8;
+  --color-scrim: rgb(0 0 0 / 45%);
+
+  /* Espacement (grille de 8, demi-pas de 4) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 32px;
+  --space-6: 48px;
+  --space-7: 64px;
+  --space-8: 96px;
+
+  /* Rayons par rôle : la pastille signale une action */
+  --radius-control: 10px;
+  --radius-card: 14px;
+  --radius-large: 20px;
+  --radius-pill: 999px;
+
+  /* Pas d'ombre de structure : la profondeur vient des surfaces et des filets.
+     Seule ombre autorisée : sous une image héros ou produit. */
+  --shadow-media: 0 8px 30px rgb(0 0 0 / 22%);
+
+  /* Typographie : polices système (SF Pro sur les plateformes Apple), échelle de graisses 400 / 600 / 700, jamais 500 */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --weight-regular: 400;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --text-micro: 0.6875rem;
+  --text-caption: 0.8125rem;
+  --text-callout: 0.9375rem;
+  --text-body: 1.0625rem;
+  --text-headline: 1.25rem;
+  --text-title: 1.75rem;
+  --text-display: clamp(2.25rem, 1.4rem + 3.4vw, 3.5rem);
+  --leading-tight: 1.1;
+  --leading-body: 1.5;
+  --tracking-tight: -0.02em;
+
+  /* Mouvement discret */
+  --duration-fast: 150ms;
+  --duration-base: 240ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  --target-min: 44px;
+
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-bg: #000000;
+    --color-surface: #272729;
+    --color-surface-raised: #2a2a2c;
+    --color-border: #3a3a3d;
+    --color-divider: #2c2c2e;
+    --color-text: #ffffff;
+    --color-text-secondary: #a1a1a6;
+    --color-accent: #2997ff;
+    --color-accent-focus: #4aa8ff;
+    --color-accent-contrast: #000000;
+    --color-accent-soft: #0b2a47;
+    --color-ok: #30d158;
+    --color-ok-soft: #12291c;
+    --color-warn: #ff9f0a;
+    --color-warn-soft: #33250e;
+    --color-critical: #ff6961;
+    --color-critical-soft: #3a1717;
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #000000;
+  --color-surface: #272729;
+  --color-surface-raised: #2a2a2c;
+  --color-border: #3a3a3d;
+  --color-divider: #2c2c2e;
+  --color-text: #ffffff;
+  --color-text-secondary: #a1a1a6;
+  --color-accent: #2997ff;
+  --color-accent-focus: #4aa8ff;
+  --color-accent-contrast: #000000;
+  --color-accent-soft: #0b2a47;
+  --color-ok: #30d158;
+  --color-ok-soft: #12291c;
+  --color-warn: #ff9f0a;
+  --color-warn-soft: #33250e;
+  --color-critical: #ff6961;
+  --color-critical-soft: #3a1717;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-fast: 0ms;
+    --duration-base: 0ms;
+  }
+}

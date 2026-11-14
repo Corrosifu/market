@@ -1,0 +1,64 @@
+[project]
+name = "market"
+version = "0.1.0"
+description = "Market : plateforme data e-commerce (marketplace avec livraison)"
+requires-python = ">=3.12"
+dependencies = []
+
+[dependency-groups]
+dev = [
+  "pytest>=8",
+  "pyyaml>=6",
+  "ruff>=0.6",
+  "mypy>=1.10",
+  # paquets du dépôt, installés en mode éditable pour que les imports et les tests fonctionnent
+  "market-common",
+  "market-auth",
+  "market-catalog",
+  "market-order",
+  "market-inventory",
+  "market-payment",
+  "market-delivery",
+  "market-dashboard-api",
+]
+
+[tool.uv.workspace]
+members = ["libs/market_common", "services/*"]
+
+[tool.uv.sources]
+market-common = { workspace = true }
+market-auth = { workspace = true }
+market-catalog = { workspace = true }
+market-order = { workspace = true }
+market-inventory = { workspace = true }
+market-payment = { workspace = true }
+market-delivery = { workspace = true }
+market-dashboard-api = { workspace = true }
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "libs", "services"]
+addopts = "-ra --import-mode=importlib"
+pythonpath = ["."]
+markers = [
+  "live: nécessite la pile docker compose démarrée (exclu par défaut en CI)",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["S101"]
+"tests/**" = ["S101", "S603", "S607", "E501"]
+"scripts/**" = ["S603", "S607", "E501"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+explicit_package_bases = true
+namespace_packages = true
+mypy_path = ["libs/market_common", "services/auth/src", "services/catalog/src", "services/order/src", "services/inventory/src", "services/payment/src", "services/delivery/src", "services/dashboard_api/src"]
+files = ["libs/market_common/market_common", "services/auth/src", "services/catalog/src", "services/order/src", "services/inventory/src", "services/payment/src", "services/delivery/src", "services/dashboard_api/src"]
