@@ -15,7 +15,7 @@ Source unique des valeurs : `frontend/src/styles/tokens.css`. Cette charte expli
 8. **Mouvement utile.** 150 à 240 ms, une transition indique un changement d'état. `prefers-reduced-motion` coupe tout.
 9. **Images réelles.** Captures d'écran et graphiques construits à partir des données ; pas d'illustration décorative.
 
-## Couleurs (clair / sombre, contrastes vérifiés en test)
+## Couleurs (clair / sombre, contrastes AA)
 | Rôle | Jeton | Usage |
 |---|---|---|
 | Fond | `--color-bg` | page |

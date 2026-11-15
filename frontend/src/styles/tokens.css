@@ -1,6 +1,6 @@
 /* Jetons de design de Market : SEULE source des couleurs, espacements, rayons, typographies et durées.
    Aucun composant n'écrit de valeur en dur : il utilise var(--...).
-   Base : skill « apple-design-system » (rukkiecodes, MIT), adapté au web et à l'accessibilité AA.
+   Base : système de design open source « apple-design-system » (rukkiecodes, licence MIT), adapté au web et à l'accessibilité AA.
    Écarts assumés : texte secondaire et couleurs de statut assombris (les valeurs d'origine ratent 4,5:1 sur fond clair),
    police système (pas de police externe). Charte : docs/design/charte-graphique.md */
 :root {

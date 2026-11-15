@@ -11,6 +11,7 @@ dev = [
   "pyyaml>=6",
   "ruff>=0.6",
   "mypy>=1.10",
+  "httpx>=0.28.1",
   # paquets du dépôt, installés en mode éditable pour que les imports et les tests fonctionnent
   "market-common",
   "market-auth",

@@ -1,7 +1,7 @@
 """Journaux JSON, une ligne par événement, avec le `trace_id` de la requête en cours.
 
 Le `trace_id` vit dans un `contextvar` : chaque requête ou tâche asyncio a sa propre valeur.
-OpenTelemetry le remplira à l'étape S7 ; d'ici là, le service le pose lui-même.
+OpenTelemetry le remplira quand le traçage sera branché ; d'ici là, le service le pose lui-même.
 """
 from __future__ import annotations
 

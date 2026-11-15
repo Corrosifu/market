@@ -3,7 +3,7 @@ name = "market-order"
 version = "0.1.0"
 description = "Service order de Market"
 requires-python = ">=3.12"
-# Les dépendances d'exécution (FastAPI, SQLAlchemy, ...) s'ajoutent avec l'accord de l'humain.
+# Les dépendances d'exécution (FastAPI, SQLAlchemy, ...) s'ajoutent avec l'implémentation du service.
 dependencies = ["market-common"]
 
 [build-system]

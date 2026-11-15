@@ -1,6 +1,6 @@
 # Stack figée (synthèse)
 
-Source détaillée : document « Market : justification des choix techniques » (alternatives, avantages, inconvénients, questions de jury). Ce fichier n'en garde que les décisions.
+Ce fichier résume les choix retenus ; les alternatives étudiées et leurs conséquences sont détaillées dans les ADR (`docs/adr/`).
 
 | Domaine | Choix | Plan B |
 |---|---|---|
@@ -23,6 +23,6 @@ Source détaillée : document « Market : justification des choix techniques » 
 ## Points à valider ou susceptibles de changer
 - Seuil de saturation 85 %, fenêtre 5 minutes, watermark 10 minutes : hypothèses.
 - Limite de lignes de l'offre gratuite de SonarQube Cloud : à revérifier.
-- Version exacte de MinIO à figer.
+- Versions épinglées ensemble dans `infra/versions.env` (S0) : Python 3.12, Java 17, Spark 3.5.5, Delta 3.3.2, connecteurs Kafka et S3, images. MinIO est figé sur la dernière release publiée (`RELEASE.2025-10-15T17-29-55Z`) ; la disponibilité de l'image reste à vérifier avant S5 (plan B : SeaweedFS ou Garage).
 - Choix `fetch-event-source` ou cookie HttpOnly pour le flux temps réel : en S6.
 - Qui porte l'interface : à décider dans l'équipe.

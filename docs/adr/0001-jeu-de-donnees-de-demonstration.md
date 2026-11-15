@@ -5,7 +5,7 @@
 
 ## Contexte
 
-Market n'a aucun volume de données : `make seed` ne crée que les fixtures dont les tests d'acceptation ont besoin (comptes `*@market.test`, `SKU-DEMO-1`, `SKU-LAST-1`, `SKU-SELLER-A-1`, `SKU-SELLER-B-1`, `HUB-TEST-10`). Ces fixtures sont rappelées à répétition par les tests (`fresh_fixtures`, délai de 300 s) : elles doivent rester petites, rapides et idempotentes.
+Market n'a aucun volume de données : les données de départ ne contiennent que les fixtures dont les tests de la pile ont besoin (comptes `*@market.test`, `SKU-DEMO-1`, `SKU-LAST-1`, `SKU-SELLER-A-1`, `SKU-SELLER-B-1`, `HUB-TEST-10`). Les tests les rétablissent à répétition : elles doivent rester petites, rapides et idempotentes.
 
 Le lakehouse (S5), les tableaux de bord (S6) et la soutenance ont besoin d'un volume crédible, multi-catégories et multi-vendeurs. Un paquet autonome a été retenu : `Market_English_v3.zip` (43,8 Mo, 287 Mo décompressé, SHA-256 `f7c08623b9987bcf8f017daf6d3b0a25bc5131dbc9db6c655854724afef205fc`, bibliothèque standard Python seule).
 
@@ -28,17 +28,17 @@ Le paquet n'a jamais été importé dans PostgreSQL, MongoDB ou Delta. Sa versio
 
 ## Décision
 
-**Option B**, avec ces règles :
+**Option B**, avec ces règles. Les commandes et fichiers cités ci-dessous (`make seed` et ses données de départ, `make fetch-data`, `make load-demo`, `data/demo/manifest.json`) sont **à livrer** avec les services concernés (étapes S1 à S5) : à la date de cette décision, ils n'existent pas encore.
 
-1. **Deux jeux distincts.** `make seed` reste le jeu de fixtures des tests, inchangé. Le jeu de démonstration se charge par `make load-demo PROFILE=ci|demo`, avec des identifiants qui ne recouvrent jamais ceux des fixtures (`PRD_…`, `SELLER_SYN_…`, `OFFER_SYN_…`, `ORD_…`, `SHIP_SYN_…`, `HUB_SYN_…`). Aucun test d'acceptation existant ne dépend du jeu de démonstration.
-2. **Aucune donnée versionnée.** Le zip est publié comme asset de release du dépôt public `market` (tag `dataset-v3`, dépôt par Bilal). `make fetch-data` le télécharge, vérifie le SHA-256 épinglé dans `data/demo/manifest.json`, l'extrait dans un cache ignoré par Git, puis lance le `verify.py` du paquet, seulement après le contrôle d'empreinte. Bibliothèque standard seule.
+1. **Deux jeux distincts.** `make seed` reste le jeu de fixtures des tests, inchangé. Le jeu de démonstration se charge par `make load-demo PROFILE=ci|demo`, avec des identifiants qui ne recouvrent jamais ceux des fixtures (`PRD_…`, `SELLER_SYN_…`, `OFFER_SYN_…`, `ORD_…`, `SHIP_SYN_…`, `HUB_SYN_…`). Aucun test existant ne dépend du jeu de démonstration.
+2. **Aucune donnée versionnée.** Le zip est publié comme asset de release du dépôt public `market` (tag `dataset-v3`). `make fetch-data` le télécharge, vérifie le SHA-256 épinglé dans `data/demo/manifest.json`, l'extrait dans un cache ignoré par Git, puis lance le `verify.py` du paquet, seulement après le contrôle d'empreinte. Bibliothèque standard seule.
 3. **Scripts du paquet non intégrés.** `generate.py`, `catalog_syn.py`, `source_tools.py`, `verify.py` et `replay.py` restent dans le zip, qui garde ainsi sa provenance. Le dépôt contient seulement notre chargeur.
 4. **Profils.** `demo` charge le paquet entier, 12 000 commandes synthétiques comprises (volume, 26 catégories vendues). `ci` charge un sous-ensemble déterministe d'environ 300 commandes, fermé sur les clés étrangères (vendeurs, produits, offres, colis et événements des commandes retenues). Pas de repli entièrement synthétique : le générateur exige le paquet v2. Si le zip est indisponible, la démonstration tourne sur les fixtures et le simulateur, avec un message explicite.
 5. **Chargement sans dépendance nouvelle.** PostgreSQL par `\copy` dans le conteneur `postgres` ; MongoDB par `mongoimport` (présent dans l'image `mongo:7.0.18`). Le chargement est idempotent : relancé, il ne crée aucun doublon.
 6. **Import, pas opération métier.** Les commandes historiques sont chargées dans leur état final : elles ne passent ni par la Saga ni par l'outbox et ne publient aucun événement. Le flux temps réel de la démonstration vient du simulateur, qui sait rejouer `event_deliveries` avec un facteur d'accélération. La saturation en direct reste portée par le simulateur de S4.
 7. **Provenance conservée** : une colonne (ou un champ) `provenance_kind` sur chaque table chargée, pour distinguer réel et synthétique devant le jury.
 
-Correspondance avec le modèle Market (détail dans les `STEP.md` concernés) :
+Correspondance avec le modèle Market :
 
 | Paquet | Market | Étape |
 |---|---|---|
@@ -59,7 +59,7 @@ Correspondance avec le modèle Market (détail dans les `STEP.md` concernés) :
 
 ## Conséquences
 
-- Un chargeur par étape, chacun après les migrations de son service ; un test d'acceptation live par étape (« chargement `ci` idempotent, comptes conformes au manifeste »), écrit par l'orchestrateur et commité par Bilal avec `[amend-protected]`.
+- Un chargeur par étape, chacun après les migrations de son service ; un test d'intégration par chargeur (« chargement `ci` idempotent, comptes conformes au manifeste »).
 - La CI d'intégration télécharge le zip (cache des Actions) pour charger le profil `ci` ; elle ne charge jamais le profil `demo`.
 - Le README public cite la source UCI et la licence CC BY 4.0, et dit ce qui est synthétique.
 - Le vocabulaire est imposé : « pseudonymisé », jamais « anonyme » ; « synthétique » pour tout ce qui n'est pas observé.
@@ -67,4 +67,4 @@ Correspondance avec le modèle Market (détail dans les `STEP.md` concernés) :
 
 ## Alternative écartée à citer à l'oral
 
-Charger le volume par `make seed` : les tests d'acceptation rappellent `make seed` à répétition avec un délai de 300 s, et leurs fixtures rares (dernier article, hub de capacité 10) seraient noyées dans 16 000 commandes. Séparer fixtures et démonstration garde des tests rapides et déterministes.
+Charger le volume avec les données de départ : les tests de la pile rétablissent ces données à répétition, et leurs fixtures rares (dernier article, hub de capacité 10) seraient noyées dans 16 000 commandes. Séparer fixtures et démonstration garde des tests rapides et déterministes.
