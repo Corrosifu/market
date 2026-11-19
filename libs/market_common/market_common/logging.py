@@ -69,3 +69,19 @@ def configure_logging(service_name: str, level: str | int = "INFO") -> None:
     handler.setFormatter(JsonFormatter(service_name))
     root.addHandler(handler)
     root.setLevel(level.upper() if isinstance(level, str) else level)
+
+
+UVICORN_LOGGERS = ("uvicorn", "uvicorn.error", "uvicorn.access")
+
+
+def configure_uvicorn_logging() -> None:
+    """Fait passer les journaux d'uvicorn (démarrage, accès) par le gestionnaire JSON du logger racine.
+
+    uvicorn installe ses propres gestionnaires texte, sans propagation, avant de charger l'application : on les
+    retire et on rétablit la propagation. À appeler après `configure_logging`, au chargement de l'application
+    (fabrique `uvicorn --factory`). Idempotente.
+    """
+    for name in UVICORN_LOGGERS:
+        logger = logging.getLogger(name)
+        logger.handlers.clear()
+        logger.propagate = True

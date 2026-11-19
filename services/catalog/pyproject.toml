@@ -3,8 +3,13 @@ name = "market-catalog"
 version = "0.1.0"
 description = "Service catalog de Market"
 requires-python = ">=3.12"
-# Les dépendances d'exécution (FastAPI, SQLAlchemy, ...) s'ajoutent avec l'implémentation du service.
-dependencies = ["market-common"]
+# Client MongoDB asynchrone natif de pymongo (pas motor), GraphQL Strawberry, serveur uvicorn.
+dependencies = [
+    "market-common",
+    "pymongo>=4.20.0",
+    "strawberry-graphql>=0.341.2",
+    "uvicorn>=0.54.0",
+]
 
 [build-system]
 requires = ["hatchling"]

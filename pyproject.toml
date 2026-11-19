@@ -21,6 +21,7 @@ dev = [
   "market-payment",
   "market-delivery",
   "market-dashboard-api",
+  "testcontainers[mongodb]>=4.15.0",
 ]
 
 [tool.uv.workspace]
@@ -37,7 +38,7 @@ market-delivery = { workspace = true }
 market-dashboard-api = { workspace = true }
 
 [tool.pytest.ini_options]
-testpaths = ["tests", "libs", "services"]
+testpaths = ["tests", "libs", "services", "data"]
 addopts = "-ra --import-mode=importlib"
 pythonpath = ["."]
 markers = [

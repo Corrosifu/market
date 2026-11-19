@@ -4,7 +4,11 @@ Plateforme data e-commerce : une marketplace avec livraison (statuts d'expéditi
 
 Projet final d'équipe, Mastère Spécialisé Data et Generative AI Engineering (EFREI), rendu le 17 décembre 2026.
 
-## Ce que fait la plateforme
+## État d'avancement
+
+Livré (étapes S0 et S1) : pile locale (PostgreSQL avec un schéma et un rôle par service, MongoDB, Kafka, NGINX), service `auth` (JWT RS256 publié en JWKS, limitation des tentatives par e-mail), passerelle NGINX qui vérifie le jeton par `auth_request`, service `catalog` (MongoDB, JSON Schema par catégorie, REST et GraphQL avec DataLoader). Les autres services du dépôt sont des squelettes ; la liste ci-dessous décrit la cible.
+
+## Objectifs de la plateforme
 
 - **Commandes** : création idempotente (en-tête `Idempotency-Key`), Saga orchestrée avec compensation (paiement refusé : la commande est annulée et le stock libéré).
 - **Stock** : réservations dans PostgreSQL, contrainte `CHECK (stock >= 0)` : pas de survente, même en concurrence.
@@ -33,12 +37,26 @@ Prérequis : Docker et Docker Compose, Python 3.12, uv, Make.
 
 ```bash
 cp .env.example .env     # puis adapter localement ; le vrai .env n'est jamais versionné
-make up                  # pile minimale (profil core)
-make up-demo             # pile complète : core, data, stream, obs
+# clés JWT locales, ignorées par Git (une fois) :
+mkdir -p infra/secrets
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out infra/secrets/jwt_private.pem
+openssl pkey -in infra/secrets/jwt_private.pem -pubout -out infra/secrets/jwt_public.pem
+make up                  # pile du profil core : bases, Kafka, auth, catalogue, NGINX
+make seed                # rétablit les comptes et produits de départ (pile démarrée)
 make down
 ```
 
-Profils Docker Compose : `core` (services et bases), `data` (lakehouse), `stream` (Kafka et Spark), `obs` (Prometheus, Grafana, OpenTelemetry).
+Profils Docker Compose : `core` (services et bases) aujourd'hui ; `data` (lakehouse), `stream` (Spark) et `obs` (Prometheus, Grafana, OpenTelemetry) arrivent avec les étapes suivantes, et `make up-demo` les démarrera.
+
+## Données de démonstration
+
+Un jeu de données de démonstration est publié à part, comme asset de la release `dataset-v3` de ce dépôt (43,8 Mo, SHA-256 `f7c08623b9987bcf8f017daf6d3b0a25bc5131dbc9db6c655854724afef205fc`) ; aucune donnée n'est versionnée. Les commandes de téléchargement (avec contrôle de l'empreinte) et de chargement arrivent avec les étapes suivantes (décision documentée dans `docs/adr/0001-jeu-de-donnees-de-demonstration.md`).
+
+- **Source réelle** : *Online Retail II*, Daqing Chen (2012), UCI Machine Learning Repository, https://doi.org/10.24432/C5CG6D, sous licence CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Seuls sont réels les regroupements de factures, les noms de produits, les quantités, les prix unitaires et les dates de 4 136 commandes d'un grossiste britannique d'articles cadeaux.
+- **Adaptation** : le jeu est une version modifiée de cette source (factures de plus de 12 lignes exclues, identifiants clients pseudonymisés, dates décalées, données synthétiques ajoutées). Il n'est ni cautionné ni relu par l'auteur ou par l'UCI.
+- **Le reste est synthétique ou dérivé par heuristique**, et marqué comme tel sur chaque ligne (`provenance_kind`) : vendeurs, offres, stock, paiements, hubs, colis, événements de livraison, 12 000 commandes supplémentaires, 15 des 26 catégories de produits ; les 11 autres catégories sont déduites des noms réels par des règles de mots-clés.
+- Les identifiants des clients réels sont **pseudonymisés**, pas anonymes ; les courriels et adresses sont fictifs. Les dates sont décalées vers 2026, les dates d'origine étant conservées dans des colonnes `*_at_source` ; la devise est la livre sterling.
+- Le chargement prévu sera séparé des données de départ : il ne modifiera jamais les comptes et produits de test.
 
 ## Organisation du dépôt
 
@@ -71,5 +89,5 @@ Ces valeurs sont lues de la configuration et restent des hypothèses de travail 
 
 ```bash
 make lint
-make test        # tests qui ne demandent pas la pile démarrée
+make test        # tests qui ne demandent pas la pile démarrée (ceux du catalogue démarrent un MongoDB jetable : Docker requis)
 ```

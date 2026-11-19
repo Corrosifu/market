@@ -1,4 +1,4 @@
-.PHONY: help test lint up up-demo down
+.PHONY: help test lint up up-demo seed down
 
 help:  ## Affiche les commandes
 	@grep -E '^[a-z-]+:.*##' Makefile | sed 's/:.*##/ :/'
@@ -12,7 +12,10 @@ lint:  ## ruff
 up:  ## Pile minimale (profil core)
 	docker compose --profile core up -d
 
-up-demo:  ## Pile complète
+seed:  ## Rétablit les comptes et produits de départ (pile démarrée)
+	sh scripts/seed.sh
+
+up-demo:  ## Pile complète (profils à venir)
 	docker compose --profile core --profile data --profile stream --profile obs up -d
 
 down:  ## Arrête la pile

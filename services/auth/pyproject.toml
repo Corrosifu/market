@@ -4,7 +4,15 @@ version = "0.1.0"
 description = "Service auth de Market"
 requires-python = ">=3.12"
 # Les dépendances d'exécution (FastAPI, SQLAlchemy, ...) s'ajoutent avec l'implémentation du service.
-dependencies = ["market-common"]
+dependencies = [
+    "alembic>=1.20.1",
+    "argon2-cffi>=25.1.0",
+    "asyncpg>=0.32.0",
+    "market-common",
+    "pyjwt[crypto]>=2.15.1",
+    "sqlalchemy[asyncio]>=2.1.8",
+    "uvicorn>=0.54.0",
+]
 
 [build-system]
 requires = ["hatchling"]

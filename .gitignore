@@ -14,3 +14,5 @@ frontend/dist/
 .DS_Store
 # données locales des conteneurs
 infra/**/data/
+# jeu de démonstration téléchargé (à venir)
+data/demo/.cache/
