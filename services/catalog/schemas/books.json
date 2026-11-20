@@ -1,26 +1,114 @@
 {
   "bsonType": "object",
   "description": "Produit de la catégorie books (sous-ensemble $jsonSchema de MongoDB).",
-  "required": ["_id", "title", "category", "seller_id", "attributes", "created_at"],
+  "required": [
+    "_id",
+    "title",
+    "category",
+    "seller_id",
+    "attributes",
+    "created_at"
+  ],
   "additionalProperties": false,
   "properties": {
-    "_id": {"bsonType": "string", "minLength": 1, "maxLength": 64},
-    "title": {"bsonType": "string", "minLength": 1, "maxLength": 200},
-    "category": {"enum": ["books"]},
-    "seller_id": {"bsonType": "string", "minLength": 1, "maxLength": 64},
-    "description": {"bsonType": "string", "maxLength": 2000},
-    "created_at": {"bsonType": "date"},
-    "provenance_kind": {"bsonType": "string", "minLength": 1, "maxLength": 64},
+    "_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "category": {
+      "enum": [
+        "books"
+      ]
+    },
+    "seller_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "description": {
+      "bsonType": "string",
+      "maxLength": 2000
+    },
+    "created_at": {
+      "bsonType": "date"
+    },
+    "provenance_kind": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
     "attributes": {
-      "bsonType": "object",
-      "required": ["author", "isbn"],
       "additionalProperties": false,
       "properties": {
-        "author": {"bsonType": "string", "minLength": 1, "maxLength": 200},
-        "isbn": {"bsonType": "string", "pattern": "^(97[89][0-9]{10}|[0-9]{9}[0-9X])$"},
-        "pages": {"bsonType": ["int", "long"], "minimum": 1, "maximum": 100000},
-        "language": {"bsonType": "string", "pattern": "^[a-z]{2}$"}
-      }
+        "book_format": {
+          "enum": [
+            "paperback",
+            "hardcover",
+            "ebook"
+          ],
+          "bsonType": "string"
+        },
+        "book_language": {
+          "enum": [
+            "en",
+            "fr",
+            "de",
+            "es"
+          ],
+          "bsonType": "string"
+        },
+        "genre": {
+          "enum": [
+            "fiction",
+            "cookery",
+            "travel",
+            "science",
+            "graphic",
+            "biography",
+            "self_help",
+            "children",
+            "history",
+            "poetry"
+          ],
+          "bsonType": "string"
+        },
+        "page_count": {
+          "maximum": 900,
+          "minimum": 16,
+          "bsonType": [
+            "int",
+            "long"
+          ]
+        },
+        "author": {
+          "bsonType": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "isbn": {
+          "bsonType": "string",
+          "pattern": "^(97[89][0-9]{10}|[0-9]{9}[0-9X])$"
+        },
+        "pages": {
+          "bsonType": [
+            "int",
+            "long"
+          ],
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "language": {
+          "bsonType": "string",
+          "pattern": "^[a-z]{2}$"
+        }
+      },
+      "bsonType": "object"
     }
   }
 }

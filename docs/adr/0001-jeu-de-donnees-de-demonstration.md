@@ -28,7 +28,7 @@ Le paquet n'a jamais été importé dans PostgreSQL, MongoDB ou Delta. Sa versio
 
 ## Décision
 
-**Option B**, avec ces règles. Les commandes et fichiers cités ci-dessous (`make seed` et ses données de départ, `make fetch-data`, `make load-demo`, `data/demo/manifest.json`) sont **à livrer** avec les services concernés (étapes S1 à S5) : à la date de cette décision, ils n'existent pas encore.
+**Option B**, avec ces règles. Les commandes et fichiers cités ci-dessous (`make seed` et ses données de départ, `make fetch-data`, `make load-demo`, `data/demo/manifest.json`) sont **à livrer** avec les services concernés (étapes S1 à S5) : à la date de cette décision, ils n'existaient pas encore. `make seed`, `make fetch-data`, `make load-demo` et `data/demo/manifest.json` sont livrés en S1 pour le catalogue ; les chargeurs des commandes, du stock, des livraisons et du lakehouse suivent en S2 à S5.
 
 1. **Deux jeux distincts.** `make seed` reste le jeu de fixtures des tests, inchangé. Le jeu de démonstration se charge par `make load-demo PROFILE=ci|demo`, avec des identifiants qui ne recouvrent jamais ceux des fixtures (`PRD_…`, `SELLER_SYN_…`, `OFFER_SYN_…`, `ORD_…`, `SHIP_SYN_…`, `HUB_SYN_…`). Aucun test existant ne dépend du jeu de démonstration.
 2. **Aucune donnée versionnée.** Le zip est publié comme asset de release du dépôt public `market` (tag `dataset-v3`). `make fetch-data` le télécharge, vérifie le SHA-256 épinglé dans `data/demo/manifest.json`, l'extrait dans un cache ignoré par Git, puis lance le `verify.py` du paquet, seulement après le contrôle d'empreinte. Bibliothèque standard seule.
@@ -54,13 +54,14 @@ Correspondance avec le modèle Market :
 - Les données contiennent `FAILED_ATTEMPT → AT_HUB` (4 778) et `OUT_FOR_DELIVERY → RETURNED` (1 327) : la machine à états de S3 doit les accepter.
 - Horodatages sans fuseau : chargés comme UTC (**hypothèse**).
 - Devise GBP conservée telle quelle, sans conversion.
+- `SHA256SUMS` du paquet écrit ses chemins avec des `\` (paquet produit sous Windows) : le `verify.py` d'origine échoue sous macOS et Linux. Le chargeur réécrit seulement les séparateurs de cet index dans la copie extraite, après le contrôle du SHA-256 du ZIP et en refusant tout chemin absolu, `..` ou `:`, puis lance `verify.py` tel quel. Le contrôle reste équivalent : les 63 empreintes ne changent pas, l'index n'est pas lui-même haché et le ZIP épinglé reste l'ancre d'intégrité. Aucun paquet corrigé n'est publié (décision du 2026-11-19).
 - Les huit hubs du paquet n'ont pas de hiérarchie : ils sont chargés comme hubs locaux, en plus des hubs de démarrage de S3. Leur capacité (300 colis) est une donnée du paquet ; le seuil de 85 % reste une **hypothèse** lue de la configuration.
 - `customer_id` du paquet, déjà pseudonymisé à la source, reste une donnée personnelle indirecte : il est re-pseudonymisé (HMAC-SHA256, `PSEUDONYMIZATION_KEY`) dès staging, comme `customer_pseudo_id`.
 
 ## Conséquences
 
 - Un chargeur par étape, chacun après les migrations de son service ; un test d'intégration par chargeur (« chargement `ci` idempotent, comptes conformes au manifeste »).
-- La CI d'intégration télécharge le zip (cache des Actions) pour charger le profil `ci` ; elle ne charge jamais le profil `demo`.
+- Prévu : la CI d'intégration téléchargera le zip (cache des Actions) pour charger le profil `ci` ; elle ne chargera jamais le profil `demo`. Ce n'est pas encore en place à la fin de S1.
 - Le README public cite la source UCI et la licence CC BY 4.0, et dit ce qui est synthétique.
 - Le vocabulaire est imposé : « pseudonymisé », jamais « anonyme » ; « synthétique » pour tout ce qui n'est pas observé.
 - Limites à dire à l'oral : un seul hub saturé dans le jeu ; source britannique d'articles cadeaux, pas une marketplace ; produits synthétiques peu variés ; v3 non reconstruite depuis le classeur UCI officiel.

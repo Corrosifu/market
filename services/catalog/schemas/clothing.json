@@ -1,0 +1,93 @@
+{
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "title",
+    "category",
+    "seller_id",
+    "attributes",
+    "created_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "seller_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "description": {
+      "bsonType": "string",
+      "maxLength": 2000
+    },
+    "created_at": {
+      "bsonType": "date"
+    },
+    "provenance_kind": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "attributes": {
+      "additionalProperties": false,
+      "properties": {
+        "care": {
+          "enum": [
+            "machine_wash",
+            "hand_wash"
+          ],
+          "bsonType": "string"
+        },
+        "fabric": {
+          "enum": [
+            "cotton",
+            "polyester",
+            "wool",
+            "denim",
+            "linen",
+            "blend"
+          ],
+          "bsonType": "string"
+        },
+        "gender_fit": {
+          "enum": [
+            "men",
+            "women",
+            "unisex",
+            "kids"
+          ],
+          "bsonType": "string"
+        },
+        "size_range": {
+          "enum": [
+            "XS-XL",
+            "S-XXL",
+            "one_size"
+          ],
+          "bsonType": "string"
+        }
+      },
+      "required": [
+        "gender_fit",
+        "size_range",
+        "fabric",
+        "care"
+      ],
+      "bsonType": "object"
+    },
+    "category": {
+      "enum": [
+        "clothing"
+      ]
+    }
+  }
+}

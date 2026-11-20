@@ -1,0 +1,82 @@
+{
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "title",
+    "category",
+    "seller_id",
+    "attributes",
+    "created_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "seller_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "description": {
+      "bsonType": "string",
+      "maxLength": 2000
+    },
+    "created_at": {
+      "bsonType": "date"
+    },
+    "provenance_kind": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "attributes": {
+      "additionalProperties": false,
+      "properties": {
+        "auto_power": {
+          "enum": [
+            "12v",
+            "usb",
+            "manual"
+          ],
+          "bsonType": "string"
+        },
+        "auto_warranty_months": {
+          "maximum": 24,
+          "minimum": 6,
+          "bsonType": [
+            "int",
+            "long"
+          ]
+        },
+        "vehicle_fit": {
+          "enum": [
+            "universal",
+            "car",
+            "motorcycle",
+            "truck"
+          ],
+          "bsonType": "string"
+        }
+      },
+      "required": [
+        "vehicle_fit",
+        "auto_power",
+        "auto_warranty_months"
+      ],
+      "bsonType": "object"
+    },
+    "category": {
+      "enum": [
+        "automotive"
+      ]
+    }
+  }
+}

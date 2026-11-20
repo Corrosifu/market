@@ -1,0 +1,81 @@
+{
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "title",
+    "category",
+    "seller_id",
+    "attributes",
+    "created_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "seller_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "description": {
+      "bsonType": "string",
+      "maxLength": 2000
+    },
+    "created_at": {
+      "bsonType": "date"
+    },
+    "provenance_kind": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "attributes": {
+      "additionalProperties": false,
+      "properties": {
+        "fragrance_free": {
+          "bsonType": "bool"
+        },
+        "skin_or_hair_type": {
+          "enum": [
+            "all",
+            "dry",
+            "oily",
+            "sensitive"
+          ],
+          "bsonType": "string"
+        },
+        "vegan": {
+          "bsonType": "bool"
+        },
+        "volume_ml": {
+          "maximum": 500,
+          "minimum": 15,
+          "bsonType": [
+            "int",
+            "long"
+          ]
+        }
+      },
+      "required": [
+        "skin_or_hair_type",
+        "volume_ml",
+        "vegan",
+        "fragrance_free"
+      ],
+      "bsonType": "object"
+    },
+    "category": {
+      "enum": [
+        "beauty"
+      ]
+    }
+  }
+}

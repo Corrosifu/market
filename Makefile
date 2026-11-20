@@ -1,4 +1,4 @@
-.PHONY: help test lint up up-demo seed down
+.PHONY: help test lint up up-demo seed down fetch-data load-demo
 
 help:  ## Affiche les commandes
 	@grep -E '^[a-z-]+:.*##' Makefile | sed 's/:.*##/ :/'
@@ -15,8 +15,17 @@ up:  ## Pile minimale (profil core)
 seed:  ## Rétablit les comptes et produits de départ (pile démarrée)
 	sh scripts/seed.sh
 
-up-demo:  ## Pile complète (profils à venir)
-	docker compose --profile core --profile data --profile stream --profile obs up -d
+PROFILE ?= ci
+
+up-demo:  ## Pile complète (profils à venir) et jeu de démonstration complet
+	docker compose --profile core --profile data --profile stream --profile obs up -d --wait
+	python3 -m data.demo up-demo
+
+fetch-data:  ## Télécharge le jeu de démonstration et vérifie son empreinte SHA-256
+	python3 -m data.demo fetch
+
+load-demo:  ## Charge le catalogue du jeu de démonstration : PROFILE=ci ou demo (pile démarrée)
+	python3 -m data.demo load --profile "$(PROFILE)"
 
 down:  ## Arrête la pile
 	docker compose --profile core --profile data --profile stream --profile obs down

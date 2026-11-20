@@ -1,0 +1,86 @@
+{
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "title",
+    "category",
+    "seller_id",
+    "attributes",
+    "created_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "seller_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "description": {
+      "bsonType": "string",
+      "maxLength": 2000
+    },
+    "created_at": {
+      "bsonType": "date"
+    },
+    "provenance_kind": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "attributes": {
+      "additionalProperties": false,
+      "properties": {
+        "pet_kind": {
+          "enum": [
+            "dog",
+            "cat",
+            "bird",
+            "fish",
+            "small_animal"
+          ],
+          "bsonType": "string"
+        },
+        "pet_material": {
+          "enum": [
+            "nylon",
+            "cotton",
+            "rubber",
+            "wood",
+            "mixed"
+          ],
+          "bsonType": "string"
+        },
+        "size_class": {
+          "enum": [
+            "small",
+            "medium",
+            "large",
+            "all"
+          ],
+          "bsonType": "string"
+        }
+      },
+      "required": [
+        "pet_kind",
+        "size_class",
+        "pet_material"
+      ],
+      "bsonType": "object"
+    },
+    "category": {
+      "enum": [
+        "pet_supplies"
+      ]
+    }
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "title",
+    "category",
+    "seller_id",
+    "attributes",
+    "created_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "seller_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "description": {
+      "bsonType": "string",
+      "maxLength": 2000
+    },
+    "created_at": {
+      "bsonType": "date"
+    },
+    "provenance_kind": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "attributes": {
+      "additionalProperties": false,
+      "properties": {
+        "accessory_form": {
+          "enum": [
+            "bag",
+            "cushion",
+            "towel",
+            "apron",
+            "scarf",
+            "textile_accessory"
+          ],
+          "bsonType": "string"
+        },
+        "folded_presentation_available": {
+          "bsonType": "bool"
+        }
+      },
+      "required": [
+        "accessory_form",
+        "folded_presentation_available"
+      ],
+      "bsonType": "object"
+    },
+    "category": {
+      "enum": [
+        "bags_textiles"
+      ]
+    }
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "title",
+    "category",
+    "seller_id",
+    "attributes",
+    "created_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "seller_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "description": {
+      "bsonType": "string",
+      "maxLength": 2000
+    },
+    "created_at": {
+      "bsonType": "date"
+    },
+    "provenance_kind": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "attributes": {
+      "additionalProperties": false,
+      "properties": {
+        "display_form": {
+          "enum": [
+            "frame",
+            "clock",
+            "sign",
+            "wall_decoration"
+          ],
+          "bsonType": "string"
+        },
+        "protective_corner_packaging": {
+          "bsonType": "bool"
+        }
+      },
+      "required": [
+        "display_form",
+        "protective_corner_packaging"
+      ],
+      "bsonType": "object"
+    },
+    "category": {
+      "enum": [
+        "wall_art"
+      ]
+    }
+  }
+}

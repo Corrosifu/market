@@ -1,0 +1,78 @@
+{
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "title",
+    "category",
+    "seller_id",
+    "attributes",
+    "created_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "seller_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "description": {
+      "bsonType": "string",
+      "maxLength": 2000
+    },
+    "created_at": {
+      "bsonType": "date"
+    },
+    "provenance_kind": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "attributes": {
+      "additionalProperties": false,
+      "properties": {
+        "assembly_required": {
+          "bsonType": "bool"
+        },
+        "furniture_material": {
+          "enum": [
+            "wood",
+            "metal",
+            "fabric",
+            "plastic",
+            "mixed"
+          ],
+          "bsonType": "string"
+        },
+        "max_load_kg": {
+          "maximum": 150,
+          "minimum": 20,
+          "bsonType": [
+            "int",
+            "long"
+          ]
+        }
+      },
+      "required": [
+        "furniture_material",
+        "assembly_required",
+        "max_load_kg"
+      ],
+      "bsonType": "object"
+    },
+    "category": {
+      "enum": [
+        "furniture"
+      ]
+    }
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "title",
+    "category",
+    "seller_id",
+    "attributes",
+    "created_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "seller_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "description": {
+      "bsonType": "string",
+      "maxLength": 2000
+    },
+    "created_at": {
+      "bsonType": "date"
+    },
+    "provenance_kind": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "attributes": {
+      "additionalProperties": false,
+      "properties": {
+        "dietary": {
+          "enum": [
+            "none",
+            "vegan",
+            "gluten_free",
+            "vegetarian"
+          ],
+          "bsonType": "string"
+        },
+        "net_weight_g": {
+          "maximum": 2000,
+          "minimum": 100,
+          "bsonType": [
+            "int",
+            "long"
+          ]
+        },
+        "organic": {
+          "bsonType": "bool"
+        },
+        "shelf_life_days": {
+          "maximum": 720,
+          "minimum": 30,
+          "bsonType": [
+            "int",
+            "long"
+          ]
+        }
+      },
+      "required": [
+        "net_weight_g",
+        "dietary",
+        "organic",
+        "shelf_life_days"
+      ],
+      "bsonType": "object"
+    },
+    "category": {
+      "enum": [
+        "grocery"
+      ]
+    }
+  }
+}

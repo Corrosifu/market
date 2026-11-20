@@ -1,0 +1,83 @@
+{
+  "bsonType": "object",
+  "required": [
+    "_id",
+    "title",
+    "category",
+    "seller_id",
+    "attributes",
+    "created_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "seller_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "description": {
+      "bsonType": "string",
+      "maxLength": 2000
+    },
+    "created_at": {
+      "bsonType": "date"
+    },
+    "provenance_kind": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "attributes": {
+      "additionalProperties": false,
+      "properties": {
+        "eu_size_range": {
+          "enum": [
+            "36-41",
+            "38-44",
+            "40-47"
+          ],
+          "bsonType": "string"
+        },
+        "shoe_use": {
+          "enum": [
+            "running",
+            "casual",
+            "hiking",
+            "indoor"
+          ],
+          "bsonType": "string"
+        },
+        "upper_material": {
+          "enum": [
+            "leather",
+            "mesh",
+            "canvas",
+            "rubber"
+          ],
+          "bsonType": "string"
+        }
+      },
+      "required": [
+        "shoe_use",
+        "upper_material",
+        "eu_size_range"
+      ],
+      "bsonType": "object"
+    },
+    "category": {
+      "enum": [
+        "shoes"
+      ]
+    }
+  }
+}

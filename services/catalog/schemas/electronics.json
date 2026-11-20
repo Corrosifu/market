@@ -1,26 +1,101 @@
 {
   "bsonType": "object",
   "description": "Produit de la catégorie electronics (sous-ensemble $jsonSchema de MongoDB).",
-  "required": ["_id", "title", "category", "seller_id", "attributes", "created_at"],
+  "required": [
+    "_id",
+    "title",
+    "category",
+    "seller_id",
+    "attributes",
+    "created_at"
+  ],
   "additionalProperties": false,
   "properties": {
-    "_id": {"bsonType": "string", "minLength": 1, "maxLength": 64},
-    "title": {"bsonType": "string", "minLength": 1, "maxLength": 200},
-    "category": {"enum": ["electronics"]},
-    "seller_id": {"bsonType": "string", "minLength": 1, "maxLength": 64},
-    "description": {"bsonType": "string", "maxLength": 2000},
-    "created_at": {"bsonType": "date"},
-    "provenance_kind": {"bsonType": "string", "minLength": 1, "maxLength": 64},
+    "_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "title": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 200
+    },
+    "category": {
+      "enum": [
+        "electronics"
+      ]
+    },
+    "seller_id": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
+    "description": {
+      "bsonType": "string",
+      "maxLength": 2000
+    },
+    "created_at": {
+      "bsonType": "date"
+    },
+    "provenance_kind": {
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 64
+    },
     "attributes": {
-      "bsonType": "object",
-      "required": ["brand", "warranty_months"],
       "additionalProperties": false,
       "properties": {
-        "brand": {"bsonType": "string", "minLength": 1, "maxLength": 100},
-        "model": {"bsonType": "string", "minLength": 1, "maxLength": 100},
-        "warranty_months": {"bsonType": ["int", "long"], "minimum": 0, "maximum": 120},
-        "power_watts": {"bsonType": ["int", "long", "double"], "minimum": 0, "maximum": 100000}
-      }
+        "connectivity": {
+          "enum": [
+            "bluetooth",
+            "wifi",
+            "usb",
+            "wired"
+          ],
+          "bsonType": "string"
+        },
+        "power_source": {
+          "enum": [
+            "battery",
+            "mains",
+            "usb_powered"
+          ],
+          "bsonType": "string"
+        },
+        "warranty_months": {
+          "bsonType": [
+            "int",
+            "long"
+          ],
+          "minimum": 0,
+          "maximum": 120
+        },
+        "brand": {
+          "bsonType": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "model": {
+          "bsonType": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "power_watts": {
+          "bsonType": [
+            "int",
+            "long",
+            "double"
+          ],
+          "minimum": 0,
+          "maximum": 100000
+        }
+      },
+      "required": [
+        "brand",
+        "warranty_months"
+      ],
+      "bsonType": "object"
     }
   }
 }
