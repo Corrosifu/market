@@ -20,11 +20,10 @@ identifiants sont les premiers dans l'ordre lexicographique. Il retient leurs
 produits, toutes les offres de ces produits, les vendeurs de ces offres et
 le premier vendeur de chaque produit. Ce profil contient 1 669 lignes de
 commande, 887 produits, 1 341 offres et 30 vendeurs sur 11 catégories.
-Les commandes et leurs lignes servent à la sélection et seront chargées
-dans PostgreSQL aux étapes suivantes.
+Le même sous-ensemble détermine les commandes et leurs lignes chargées dans PostgreSQL.
 
 `make load-demo PROFILE=demo` charge les 4 919 produits, 7 406 offres et
-60 vendeurs du paquet entier. `make up-demo` démarre la pile puis télécharge,
+60 vendeurs du paquet entier, ainsi que ses commandes, paiements et stocks. `make up-demo` démarre la pile puis télécharge,
 vérifie et charge ce profil complet. Un téléchargement indisponible est
 signalé et la pile continue avec les fixtures locales. Une erreur d'intégrité,
 de validation ou d'import termine la commande avec un code non nul.
@@ -69,6 +68,62 @@ une transaction. Les collections temporaires sont supprimées en fin de commande
 Deux imports simultanés depuis le même checkout sont refusés par un verrou
 de fichier libéré automatiquement à la fermeture du processus. Des imports
 depuis plusieurs checkouts vers la même base doivent être coordonnés.
+
+## Commandes, paiements et stock (S2)
+
+Après le catalogue, la même commande charge les six tables PostgreSQL ;
+`make up-demo` utilise aussi ce chemin. Lancer d'abord `make up` pour appliquer
+les migrations des services `order`, `payment` et `inventory`. Une table
+absente fait échouer l'import avec l'indication de lancer `make up`.
+
+| Lignes chargées | `ci` | `demo` |
+|---|---:|---:|
+| Commandes | 300 | 16 136 |
+| Lignes de commande | 1 669 | 50 919 |
+| Paiements | 344 | 17 463 |
+| Positions de stock | 1 341 | 7 406 |
+| Réservations | 160 | 901 |
+| Mouvements | 22 590 | 59 834 |
+
+Le lecteur réutilise `read_catalog`, ses commandes et ses offres retenues.
+Les lignes et paiements suivent les commandes ; stock, réservations et
+mouvements suivent les offres. La correspondance `sku = offer_id` utilise
+le couple produit/vendeur pour les lignes, le triplet produit/vendeur/hub
+pour le stock. Une référence absente du paquet est une erreur explicite,
+même si elle se trouve hors de la sélection `ci`. Un mouvement d'une offre
+retenue peut référencer une ligne d'une commande non retenue : son
+`order_item_id` est alors chargé à `NULL` en `ci`. Les réservations du paquet
+ont toujours `order_id` nul.
+
+Les commandes portent `status=CONFIRMED`, le statut du paquet dans
+`historical_status` et `merchandise_total_gbp` dans `total_gbp`. Les quantités
+et `unit_price_gbp` des lignes sont conservés séparément, sans conversion
+par flottant. Paiements : captures et remboursements, statut `SUCCEEDED`,
+`payment_at` vers `created_at`. Stock : `available_quantity`,
+`reserved_quantity` et `on_hand_quantity` vers `available`, `reserved` et
+`on_hand`, `snapshot_at` vers `updated_at`. Tous les horodatages sans fuseau
+sont interprétés comme UTC (**hypothèse de l'ADR 0001**) et écrits avec un
+fuseau explicite ; la session psql utilise aussi UTC. La devise reste GBP.
+Les identifiants clients sont pseudonymisés à la source et restent des
+données personnelles indirectes.
+
+Le script `.cache/postgres.sql` est écrit en octets UTF-8, fins de ligne LF,
+et passé tel quel à une seule session `psql -v ON_ERROR_STOP=1`. Ses six
+`\copy … FROM STDIN` incluent les données dans le script. Une transaction
+contrôle la présence des tables avant toute suppression, retire uniquement
+les lignes `provenance_kind IS NOT NULL`, puis charge les parents avant les
+enfants. Mouvements et réservations sont supprimés avant le stock. Les
+contraintes `CHECK` restent actives ; une erreur SQL annule la transaction.
+Les fixtures et les commandes API, dont la provenance est nulle, sont
+préservées. Les comptes relus dans les tables sont comparés au manifeste,
+comme ceux du catalogue. Les deux sens de changement de profil retirent
+les anciennes lignes du jeu. Aucun import n'écrit dans `saga_instances`,
+`outbox` ou `idempotency_keys`, et aucun événement n'est publié.
+
+La publication MongoDB et la transaction PostgreSQL sont successives,
+sans transaction distribuée : si PostgreSQL échoue après publication du
+catalogue, la commande échoue et doit être relancée. Le script du cache
+contient les données pseudonymisées du profil ; il n'est jamais versionné.
 
 ## Tests et provenance
 

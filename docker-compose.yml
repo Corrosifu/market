@@ -136,6 +136,93 @@ services:
       retries: 6
       start_period: 20s
 
+  inventory:
+    build:
+      context: .
+      dockerfile: services/inventory/Dockerfile
+    profiles: [core]
+    mem_limit: 256m
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-local}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:-market}
+      INVENTORY_DB_PASSWORD: ${INVENTORY_DB_PASSWORD:?}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3).close()"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+  payment:
+    build:
+      context: .
+      dockerfile: services/payment/Dockerfile
+    profiles: [core]
+    mem_limit: 256m
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-local}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:-market}
+      PAYMENT_DB_PASSWORD: ${PAYMENT_DB_PASSWORD:?}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3).close()"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
+  order:
+    build:
+      context: .
+      dockerfile: services/order/Dockerfile
+    profiles: [core]
+    mem_limit: 384m
+    depends_on:
+      postgres:
+        condition: service_healthy
+      inventory:
+        condition: service_healthy
+      payment:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-local}
+      POSTGRES_HOST: ${POSTGRES_HOST:-postgres}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:-market}
+      ORDERS_DB_PASSWORD: ${ORDERS_DB_PASSWORD:?}
+      INVENTORY_URL: ${INVENTORY_URL:-http://inventory:8000}
+      PAYMENT_URL: ${PAYMENT_URL:-http://payment:8000}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      PAYMENT_TIMEOUT_SECONDS: ${PAYMENT_TIMEOUT_SECONDS:-1}
+      INVENTORY_TIMEOUT_SECONDS: ${INVENTORY_TIMEOUT_SECONDS:-1}
+      RETRY_ATTEMPTS: ${RETRY_ATTEMPTS:-3}
+      RETRY_BACKOFF_SECONDS: ${RETRY_BACKOFF_SECONDS:-0.1}
+      BREAKER_FAILURE_THRESHOLD: ${BREAKER_FAILURE_THRESHOLD:-3}
+      BREAKER_RESET_SECONDS: ${BREAKER_RESET_SECONDS:-5}
+      BULKHEAD_MAX_CONCURRENT: ${BULKHEAD_MAX_CONCURRENT:-20}
+      SAGA_STUCK_SECONDS: ${SAGA_STUCK_SECONDS:-60}
+      SAGA_RECOVERY_INTERVAL_SECONDS: ${SAGA_RECOVERY_INTERVAL_SECONDS:-10}
+      ORDER_STUB_UNIT_PRICE_GBP: ${ORDER_STUB_UNIT_PRICE_GBP:-10.00}
+      OUTBOX_POLL_SECONDS: ${OUTBOX_POLL_SECONDS:-1}
+      KAFKA_DELIVERY_TIMEOUT_SECONDS: ${KAFKA_DELIVERY_TIMEOUT_SECONDS:-5}
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3).close()"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+
   gateway:
     image: nginx:1.28.0-alpine
     profiles: [core]

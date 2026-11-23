@@ -4,7 +4,13 @@ version = "0.1.0"
 description = "Service payment de Market"
 requires-python = ">=3.12"
 # Les dépendances d'exécution (FastAPI, SQLAlchemy, ...) s'ajoutent avec l'implémentation du service.
-dependencies = ["market-common"]
+dependencies = [
+    "alembic==1.20.1",
+    "asyncpg==0.32.0",
+    "market-common",
+    "sqlalchemy[asyncio]==2.1.8",
+    "uvicorn==0.54.0",
+]
 
 [build-system]
 requires = ["hatchling"]

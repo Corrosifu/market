@@ -24,7 +24,7 @@ up-demo:  ## Pile complète (profils à venir) et jeu de démonstration complet
 fetch-data:  ## Télécharge le jeu de démonstration et vérifie son empreinte SHA-256
 	python3 -m data.demo fetch
 
-load-demo:  ## Charge le catalogue du jeu de démonstration : PROFILE=ci ou demo (pile démarrée)
+load-demo:  ## Charge le jeu de démonstration (catalogue, commandes, stock) : PROFILE=ci ou demo (pile démarrée)
 	python3 -m data.demo load --profile "$(PROFILE)"
 
 down:  ## Arrête la pile

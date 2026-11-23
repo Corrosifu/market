@@ -6,7 +6,9 @@ Projet final d'équipe, Mastère Spécialisé Data et Generative AI Engineering 
 
 ## État d'avancement
 
-Livré (étapes S0 et S1) : pile locale (PostgreSQL avec un schéma et un rôle par service, MongoDB, Kafka, NGINX), service `auth` (JWT RS256 publié en JWKS, limitation des tentatives par e-mail), passerelle NGINX qui vérifie le jeton par `auth_request`, service `catalog` (MongoDB, JSON Schema par catégorie, REST et GraphQL avec DataLoader). Les autres services du dépôt sont des squelettes ; la liste ci-dessous décrit la cible.
+Livré (étapes S0 et S1) : pile locale (PostgreSQL avec un schéma et un rôle par service, MongoDB, Kafka, NGINX), service `auth` (JWT RS256 publié en JWKS, limitation des tentatives par e-mail), passerelle NGINX qui vérifie le jeton par `auth_request`, service `catalog` (MongoDB, JSON Schema par catégorie, REST et GraphQL avec DataLoader).
+
+Livré (étape S2) : commandes, stock et paiement. Le service `order` crée une commande de façon idempotente (en-tête `Idempotency-Key`) et orchestre la Saga : réserver le stock, payer, confirmer ; en cas d'échec, compensation par opérations inverses (libération du stock), et une commande dont l'issue n'est pas établie reste `PENDING` jusqu'à sa reprise (sans délai maximal garanti tant que le paiement reste injoignable). Le service `inventory` réserve le stock par une instruction SQL conditionnelle, sous `CHECK (available >= 0)` : pas de survente, même en concurrence. Le service `payment` est un bouchon idempotent, avec échec simulable en local. Les appels sortants passent par `market_common.resilience` (délai, retry sur les seuls appels idempotents, circuit breaker, bulkhead). Les événements `OrderConfirmed` et `OrderCancelled` partent vers Kafka par une outbox écrite dans la même transaction que le statut ; livraison au moins une fois, les consommateurs dédupliquent par `event_id`. Le prix unitaire est encore fixe (**hypothèse** temporaire). Les autres services du dépôt (livraison, tableau de bord) sont des squelettes ; la liste ci-dessous décrit la cible.
 
 ## Objectifs de la plateforme
 
@@ -41,8 +43,8 @@ cp .env.example .env     # puis adapter localement ; le vrai .env n'est jamais v
 mkdir -p infra/secrets
 openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out infra/secrets/jwt_private.pem
 openssl pkey -in infra/secrets/jwt_private.pem -pubout -out infra/secrets/jwt_public.pem
-make up                  # pile du profil core : bases, Kafka, auth, catalogue, NGINX
-make seed                # rétablit les comptes et produits de départ (pile démarrée)
+make up                  # pile du profil core : bases, Kafka, auth, catalogue, commandes, stock, paiement, NGINX
+make seed                # rétablit les comptes, produits et stocks de départ (pile démarrée)
 make down
 ```
 
@@ -50,13 +52,13 @@ Profils Docker Compose : `core` (services et bases) aujourd'hui ; `data` (lakeho
 
 ## Données de démonstration
 
-Un jeu de données de démonstration est publié à part, comme asset de la release `dataset-v3` de ce dépôt (43,8 Mo, SHA-256 `f7c08623b9987bcf8f017daf6d3b0a25bc5131dbc9db6c655854724afef205fc`) ; aucune donnée n'est versionnée. `make fetch-data` le télécharge et refuse toute archive dont l'empreinte diffère ; `make load-demo PROFILE=ci` (environ 300 commandes, leurs produits, offres et vendeurs) ou `PROFILE=demo` (paquet entier) charge le catalogue dans MongoDB, pile démarrée ; `make up-demo` démarre la pile et charge le profil `demo`. Python 3.11 ou plus est requis sur le poste. Le chargement des commandes, du stock et des livraisons arrive avec les étapes suivantes (décision documentée dans `docs/adr/0001-jeu-de-donnees-de-demonstration.md`).
+Un jeu de données de démonstration est publié à part, comme asset de la release `dataset-v3` de ce dépôt (43,8 Mo, SHA-256 `f7c08623b9987bcf8f017daf6d3b0a25bc5131dbc9db6c655854724afef205fc`) ; aucune donnée n'est versionnée. `make fetch-data` le télécharge et refuse toute archive dont l'empreinte diffère ; `make load-demo PROFILE=ci` (environ 300 commandes, leurs produits, offres et vendeurs) ou `PROFILE=demo` (paquet entier) charge le catalogue dans MongoDB, puis les commandes, lignes, paiements, stocks, réservations et mouvements dans PostgreSQL, pile démarrée ; `make up-demo` démarre la pile et charge le profil `demo`. Python 3.11 ou plus est requis sur le poste. Les commandes du jeu sont importées dans leur état final, sans passer par la Saga ni publier d'événement. Le chargement des livraisons arrive avec l'étape suivante (décision documentée dans `docs/adr/0001-jeu-de-donnees-de-demonstration.md`).
 
-- **Source réelle** : *Online Retail II*, Daqing Chen (2012), UCI Machine Learning Repository, https://doi.org/10.24432/C5CG6D, sous licence CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Seuls sont réels les regroupements de factures, les noms de produits, les quantités, les prix unitaires et les dates de 4 136 commandes d'un grossiste britannique d'articles cadeaux.
+- **Source réelle** : *Online Retail II*, Daqing Chen (2012), UCI Machine Learning Repository, https://doi.org/10.24432/C5CG6D, sous licence CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/). Seuls sont réels les regroupements de factures, les noms de produits, les quantités, les prix unitaires et les dates d'origine (conservées dans les colonnes `*_at_source`) de 4 136 commandes d'un grossiste britannique d'articles cadeaux.
 - **Adaptation** : le jeu est une version modifiée de cette source (factures de plus de 12 lignes exclues, identifiants clients pseudonymisés, dates décalées, données synthétiques ajoutées). Il n'est ni cautionné ni relu par l'auteur ou par l'UCI.
 - **Le reste est synthétique ou dérivé par heuristique**, et marqué comme tel sur chaque ligne (`provenance_kind`) : vendeurs, offres, stock, paiements, hubs, colis, événements de livraison, 12 000 commandes supplémentaires, 15 des 26 catégories de produits ; les 11 autres catégories sont déduites des noms réels par des règles de mots-clés.
 - Les identifiants des clients réels sont **pseudonymisés**, pas anonymes ; les courriels et adresses sont fictifs. Les dates sont décalées vers 2026, les dates d'origine étant conservées dans des colonnes `*_at_source` ; la devise est la livre sterling.
-- Le chargement est séparé des données de départ (`make seed`) : relancé, il ne crée aucun doublon ; il est conçu pour ne pas modifier les comptes et produits de test, dont les identifiants ne portent pas les préfixes du jeu.
+- Le chargement est séparé des données de départ (`make seed`) : relancé, il ne crée aucun doublon ; il est conçu pour ne pas modifier les comptes, produits et stocks de test : il ne remplace que les lignes marquées par `provenance_kind`, que les données de départ et les commandes passées par l'API n'ont pas.
 
 ## Organisation du dépôt
 

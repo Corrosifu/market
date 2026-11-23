@@ -1,4 +1,4 @@
-"""Commandes du jeu v3. Les données restent dans le cache local et dans MongoDB."""
+"""Commandes du jeu v3. Les données restent dans le cache local et dans MongoDB et PostgreSQL."""
 import argparse
 import json
 import subprocess

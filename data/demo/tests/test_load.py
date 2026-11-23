@@ -1,10 +1,12 @@
+import json
 import subprocess
 
 import pytest
 
-from data.demo.dataset import CatalogData
+from data.demo.dataset import CatalogData, read_catalog
 from data.demo.errors import DatasetError
 from data.demo.load import exclusive_import, import_documents, load_profile
+from data.demo.postgres import read_postgres
 
 
 def test_rejected_document_fails_import_and_never_publishes_staging():
@@ -43,19 +45,32 @@ def test_import_success_checks_actual_counts_and_reconciles_only_demo_prefixes()
     assert "deleteMany" in commit and '"PRD_"' in commit and "$nin" in commit
 
 
-def test_catalog_is_rebuilt_before_any_import(monkeypatch, tmp_path):
-    documents = {"sellers": [{"_id": "SELLER_SYN_a"}], "products": [{"_id": "PRD_a"}],
-                 "offers": [{"_id": "OFFER_SYN_a"}]}
-    selected = CatalogData(documents, ("order-a",), 1)
-    monkeypatch.setattr("data.demo.load.read_catalog", lambda *args: selected)
+def test_catalog_is_rebuilt_before_both_imports_and_all_manifest_counts_are_checked(monkeypatch, packet, tmp_path):
+    catalog = read_catalog(packet, "demo")
+    postgres = read_postgres(packet, catalog)
+    expected = catalog.counts() | postgres.counts()
     calls = []
+    monkeypatch.setattr("data.demo.load.ROOT", tmp_path)
 
     def run(args, input=None):
         calls.append(args)
-        return subprocess.CompletedProcess(args, 0, '{"sellers":1,"products":1,"offers":1}', "")
+        return subprocess.CompletedProcess(args, 0, '{"sellers":4,"products":3,"offers":3}', "")
 
-    load_profile(tmp_path, "ci", {"profiles": {"ci": selected.counts()}}, run=run)
+    def run_pg(args, input=None):
+        calls.append(args)
+        return subprocess.CompletedProcess(args, 0, json.dumps(postgres.counts()).encode(), b"")
+
+    result = load_profile(packet, "demo", {"profiles": {"demo": expected}}, run=run, run_postgres=run_pg)
+    assert result == expected
     assert calls[0] == ["docker", "compose", "up", "-d", "--build", "--wait", "catalog"]
+    assert calls[-1][4:6] == ["postgres", "psql"]
+    assert all("mongo" in args for args in calls[1:-1])
+    # Les nouvelles clés du manifeste sont aussi contrôlées avant toute écriture.
+    calls.clear()
+    with pytest.raises(DatasetError, match="manifeste"):
+        load_profile(packet, "demo", {"profiles": {"demo": expected | {"payments": 99}}},
+                     run=run, run_postgres=run_pg)
+    assert not calls
 
 
 def test_manifest_mismatch_fails_before_database_changes(monkeypatch, tmp_path):

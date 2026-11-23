@@ -1,11 +1,11 @@
 # Pile locale
 
 Copier `.env.example` vers `.env` et y remplacer les valeurs, puis `make up` démarre
-PostgreSQL, MongoDB, Kafka JVM (KRaft à un broker), les services `auth` et `catalog`
-et NGINX dans le profil `core`.
+PostgreSQL, MongoDB, Kafka JVM (KRaft à un broker), les services `auth`, `catalog`, `inventory`,
+`payment` et `order`, et NGINX dans le profil `core`.
 `make down` arrête les conteneurs en conservant les volumes.
 
-La passerelle répond sur http://localhost:8080/ et `/healthz`.
+La passerelle répond sur http://127.0.0.1:8080/ et `/healthz`.
 MongoDB, sans authentification en local, est accessible sur le réseau compose
 et sur `127.0.0.1:27017` uniquement : limite assumée, décrite dans le README du catalogue.
 Kafka annonce `kafka:9092` aux clients compose et `localhost:29092` aux outils

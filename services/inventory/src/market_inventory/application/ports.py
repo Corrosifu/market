@@ -1,0 +1,13 @@
+from typing import Protocol
+
+from market_inventory.domain.model import Line, Reservation, Status, Stock
+
+
+class Inventory(Protocol):
+    async def reserve(self, order_id: str, lines: tuple[Line, ...]) -> Reservation: ...
+
+    async def finish(self, order_id: str, status: Status) -> None: ...
+
+    async def stock(self, sku: str) -> Stock | None: ...
+
+    async def ready(self) -> bool: ...

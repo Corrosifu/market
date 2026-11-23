@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OrderCancelled.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "event_id",
+    "event_type",
+    "occurred_at",
+    "schema_version",
+    "payload"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "event_type": {
+      "const": "OrderCancelled"
+    },
+    "occurred_at": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "(Z|\\+00:00)$"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "order_id",
+        "reason"
+      ],
+      "properties": {
+        "order_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "PAYMENT_DECLINED",
+            "DEPENDENCY_UNAVAILABLE",
+            "STOCK_UNAVAILABLE",
+            "RECOVERED_STUCK_SAGA"
+          ]
+        }
+      }
+    }
+  }
+}

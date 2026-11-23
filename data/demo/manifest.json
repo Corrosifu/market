@@ -2,7 +2,9 @@
   "url": "https://github.com/Corrosifu/market/releases/download/dataset-v3/Market_English_v3.zip",
   "sha256": "f7c08623b9987bcf8f017daf6d3b0a25bc5131dbc9db6c655854724afef205fc",
   "profiles": {
-    "ci": {"orders": 300, "order_items": 1669, "sellers": 30, "products": 887, "offers": 1341},
-    "demo": {"orders": 16136, "order_items": 50919, "sellers": 60, "products": 4919, "offers": 7406}
+    "ci": {"orders": 300, "order_items": 1669, "sellers": 30, "products": 887, "offers": 1341,
+           "payments": 344, "inventory": 1341, "stock_reservations": 160, "inventory_movements": 22590},
+    "demo": {"orders": 16136, "order_items": 50919, "sellers": 60, "products": 4919, "offers": 7406,
+             "payments": 17463, "inventory": 7406, "stock_reservations": 901, "inventory_movements": 59834}
   }
 }

@@ -11,6 +11,7 @@ from uuid import uuid4
 
 from data.demo.dataset import PREFIXES, Document, read_catalog
 from data.demo.errors import DatasetError
+from data.demo.postgres import BinaryRunner, import_postgres, read_postgres, run_binary_command
 
 ROOT = Path(__file__).resolve().parents[2]
 Runner = Callable[..., subprocess.CompletedProcess[str]]
@@ -125,15 +126,24 @@ def exclusive_import(cache: Path):
         yield  # Fermer le descripteur libère aussi le verrou en cas d'erreur.
 
 
-def load_profile(package: Path, profile: str, manifest: dict[str, Any], *, run: Runner = run_command) -> dict[str, int]:
+def load_profile(package: Path, profile: str, manifest: dict[str, Any], *, run: Runner = run_command,
+                 run_postgres: BinaryRunner = run_binary_command) -> dict[str, int]:
     data = read_catalog(package, profile)
-    if data.counts() != manifest["profiles"][profile]:
+    expected = manifest["profiles"][profile]
+    if any(expected.get(name) != count for name, count in data.counts().items()):
         raise DatasetError(f"Comptes du profil {profile} différents du manifeste : {data.counts()}")
+    postgres = read_postgres(package, data)
+    selected = data.counts() | postgres.counts()
+    if selected != expected:
+        raise DatasetError(f"Comptes du profil {profile} différents du manifeste : {selected}")
     with exclusive_import(ROOT / "data/demo/.cache"):
         print("Reconstruction du catalogue et application des validateurs…", flush=True)
         rebuilt = run(["docker", "compose", "up", "-d", "--build", "--wait", "catalog"])
         if rebuilt.returncode:
             raise DatasetError(f"Reconstruction du catalogue échouée : {(rebuilt.stdout + rebuilt.stderr)[-4000:]}")
         counts = import_documents(data.documents, run=run)
+        counts.update(import_postgres(postgres, ROOT / "data/demo/.cache", run=run_postgres))
+        if counts != expected:
+            raise DatasetError(f"Comptes des bases après import {counts}, attendus {expected}")
     print(f"Profil {profile} chargé : " + ", ".join(f"{name}={count}" for name, count in counts.items()))
     return counts
